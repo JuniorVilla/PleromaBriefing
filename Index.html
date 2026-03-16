@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pleroma | Master Briefing System</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pleroma-red: #bf3737;
+            --white: #ffffff;
+            --black: #000000;
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            --font-main: 'Inter', sans-serif;
+            --font-title: 'Outfit', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: radial-gradient(circle at top right, #1a1a1a, #000000);
+            color: var(--white);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+
+        header { text-align: center; margin-bottom: 40px; }
+        .logo-container { 
+            font-family: var(--font-title); 
+            font-size: clamp(2rem, 8vw, 3.5rem); 
+            font-weight: 900; 
+            letter-spacing: 15px; 
+            text-transform: uppercase; 
+        }
+        .logo-container span { color: var(--pleroma-red); text-shadow: 0 0 20px rgba(191, 55, 55, 0.5); }
+
+        .progress-wrapper { width: 100%; max-width: 800px; margin: 0 auto 30px auto; }
+        .progress-container { width: 100%; height: 6px; background: var(--glass); border-radius: 10px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: var(--pleroma-red); transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 20px var(--pleroma-red); }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 0 auto 30px auto;
+            max-width: 800px;
+        }
+
+        @media (max-width: 480px) {
+            .services-grid { grid-template-columns: 1fr; }
+        }
+
+        .service-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 25px 15px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+
+        .service-card i { width: 24px; height: 24px; color: #fff; opacity: 0.5; transition: 0.3s; }
+
+        .service-card:hover, .service-card.selected {
+            background: var(--pleroma-red);
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.4);
+            box-shadow: 0 15px 30px rgba(191, 55, 55, 0.3);
+        }
+
+        .service-card.selected i { opacity: 1; transform: scale(1.1); }
+        .service-card span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-title); }
+
+        .main-card {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: clamp(20px, 5vw, 40px);
+            box-shadow: var(--shadow);
+            position: relative;
+            min-height: 450px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h2 { font-family: var(--font-title); border-left: 4px solid var(--pleroma-red); padding-left: 15px; margin-bottom: 30px; font-size: 1.3rem; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .field-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        label { font-size: 0.65rem; text-transform: uppercase; color: #999; letter-spacing: 1px; font-weight: 600; }
+
+        input, textarea, select {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 14px; border-radius: 10px; color: white; outline: none; transition: 0.3s; font-size: 0.9rem;
+            width: 100%;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--pleroma-red); background: rgba(255, 255, 255, 0.08); }
+
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
+        .btn {
+            padding: 16px 25px; border-radius: 50px; border: none; font-weight: 700;
+            cursor: pointer; text-transform: uppercase; transition: 0.3s; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 10px; font-size: 0.7rem; font-family: var(--font-title);
+        }
+        .btn-next { background: var(--white); color: var(--black); }
+        .btn-next:hover { background: var(--pleroma-red); color: white; transform: scale(1.03); }
+        .btn-prev { background: transparent; color: white; border: 1px solid var(--glass-border); }
+
+        #scanning-screen { display: none; text-align: center; padding: 60px 0; position: relative; }
+        .scanner-line {
+            width: 100%; height: 2px; background: var(--pleroma-red);
+            position: absolute; left: 0; top: 0;
+            box-shadow: 0 0 15px var(--pleroma-red);
+            animation: scanMove 2s infinite ease-in-out;
+        }
+        @keyframes scanMove { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: slideIn 0.4s ease forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        .footer-note { text-align: center; margin-top: 50px; color: #555; font-size: 0.6rem; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-container">PLE<span>ROMA</span></div>
+        <p style="color: #888; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 10px;">Consultoría Creativa Estratégica</p>
+    </header>
+
+    <div class="progress-wrapper">
+        <div class="progress-container"><div class="progress-bar" id="progress"></div></div>
+    </div>
+
+    <div class="services-grid" id="service-selector">
+        <div class="service-card" data-service="Identidad Corporativa" onclick="selectService('Identidad Corporativa')"><i data-lucide="briefcase"></i><span>Id. Corporativa</span></div>
+        <div class="service-card" data-service="Campañas" onclick="selectService('Campañas')"><i data-lucide="megaphone"></i><span>Campañas</span></div>
+        <div class="service-card" data-service="Identidad Visual" onclick="selectService('Identidad Visual')"><i data-lucide="palette"></i><span>Id. Visual</span></div>
+        <div class="service-card" data-service="Spots" onclick="selectService('Spots')"><i data-lucide="clapperboard"></i><span>Spots</span></div>
+        <div class="service-card" data-service="Editorial" onclick="selectService('Editorial')"><i data-lucide="book-open"></i><span>Editorial</span></div>
+        <div class="service-card" data-service="Animación" onclick="selectService('Animación')"><i data-lucide="play-circle"></i><span>Animación</span></div>
+        <div class="service-card" data-service="Slogan" onclick="selectService('Slogan')"><i data-lucide="quote"></i><span>Slogan</span></div>
+        <div class="service-card" data-service="Página Web" onclick="selectService('Página Web')"><i data-lucide="layout"></i><span>Web UI/UX</span></div>
+    </div>
+
+    <div class="main-card">
+        <form id="pleroma-form" action="https://formspree.io/f/juniorvillalobosvalero@gmail.com" method="POST">
+            <input type="hidden" name="_subject" value="Nuevo Briefing de Pleroma">
+            <input type="hidden" name="UNIDAD_DE_NEGOCIO" id="hidden-service" required>
+
+            <div class="step-content active" id="step-1">
+                <h2>01. ADN del Proyecto</h2>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Nombre de la Marca</label>
+                        <input type="text" name="Nombre_Marca" id="client-name" required placeholder="Nombre de tu empresa">
+                    </div>
+                    <div class="field-group">
+                        <label>Correo de Contacto</label>
+                        <input type="email" name="email" required placeholder="tu@correo.com">
+                    </div>
+                    <div class="field-group">
+                        <label>Estado actual</label>
+                        <select name="Estado_Proyecto">
+                            <option value="Nuevo">Lanzamiento desde cero</option>
+                            <option value="Rediseño">Rediseño o Evolución</option>
+                            <option value="Mantenimiento">Crecimiento / Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Competidores clave</label>
+                        <input type="text" name="Competidores" placeholder="¿A quiénes analizamos?">
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-prev" onclick="resetSelector()">Limpiar</button>
+                    <button type="button" class="btn btn-next" onclick="goToStep(2)">Siguiente <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="step-content" id="step-2">
+                <h2>02. Visión y Tono</h2>
+                <div class="field-group">
+                    <label>¿Qué problema creativo debemos resolver?</label>
+                    <textarea name="Objetivo_Creativo" rows="3" required placeholder="Describe brevemente tu necesidad..."></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Atmósfera deseada</label>
+                        <select name="Tono_Voz">
+                            <option value="High-Tech">Tecnológico & Futurista</option>
+                            <option value="Premium">Elegante & Premium</option>
+                            <option value="Minimalista">Limpio & Minimalista</option>
+                            <option value="Disruptivo">Audaz & Rompedor</option>
+                            <option value="Corporativo">Serio & Profesional</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Público objetivo</label>
+                        <input type="text" name="Target" placeholder="¿A quién va dirigido?">
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-prev" onclick="goToStep(1)">Atrás</button>
+                    <button type="button" class="btn btn-next" onclick="goToStep(3)">Siguiente <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="step-content" id="step-3">
+                <h2>03. Logística</h2>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Inversión estimada</label>
+                        <select name="Presupuesto">
+                            <option value="Startup">Escala Emprendedor / Startup</option>
+                            <option value="Profesional">Escala Profesional / PYME</option>
+                            <option value="Enterprise">Escala Corporativa / Global</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Plazo de entrega</label>
+                        <select name="Plazo">
+                            <option value="Urgente">Prioridad Máxima (Urgente)</option>
+                            <option value="Normal">Plazo Estándar</option>
+                            <option value="Planificado">Desarrollo por fases</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>Referencias o inspiración</label>
+                    <input type="text" name="Referencias" placeholder="Links de Pinterest, Behance o webs">
+                </div>
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-prev" onclick="goToStep(2)">Atrás</button>
+                    <button type="submit" id="submit-btn" class="btn btn-next" style="background: var(--pleroma-red); color: white;">
+                        ENVIAR BRIEFING <i data-lucide="shield-check"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="scanning-screen">
+                <div class="scanner-line"></div>
+                <i data-lucide="cpu" style="margin-bottom: 20px; color: #bf3737; width: 40px; height: 40px;"></i>
+                <h3 style="letter-spacing: 5px; font-family: var(--font-title);">PROCESANDO DATOS</h3>
+                <p style="color: #666; font-size: 0.75rem;">Sincronizando con los servidores de Pleroma...</p>
+            </div>
+
+            <div class="step-content" id="step-success">
+                <div style="text-align: center;">
+                    <i data-lucide="check-circle" style="color: #bf3737; width: 60px; height: 60px;"></i>
+                    <h2 style="border:none; text-align:center; font-size: 1.8rem; margin-top:20px;">BRIEFING RECIBIDO</h2>
+                    <p id="final-msg" style="color: #aaa; margin-bottom: 30px; font-size: 0.85rem;"></p>
+                    <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                        <a id="whatsapp-link" href="#" target="_blank" class="btn" style="background: #25D366; color: white; text-decoration: none;">
+                           <i data-lucide="message-circle"></i> Notificar por WhatsApp
+                        </a>
+                        <button type="button" class="btn btn-prev" onclick="location.reload()">
+                             <i data-lucide="refresh-ccw"></i> Nuevo Registro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <p class="footer-note">© 2026 PLEROMA | MASTER SYSTEM V2.5</p>
+</div>
+
+<script>
+    // Inicializar Iconos
+    lucide.createIcons();
+
+    let currentService = "";
+
+    function selectService(service) {
+        currentService = service;
+        document.getElementById('hidden-service').value = service;
+        
+        // Estilo visual
+        document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+        const card = document.querySelector(`[data-service="${service}"]`);
+        if(card) card.classList.add('selected');
+
+        // Feedback visual
+        let statusMsg = document.getElementById('status-msg') || document.createElement('p');
+        statusMsg.id = 'status-msg';
+        statusMsg.style.cssText = "text-align:center; color:var(--pleroma-red); font-size:0.6rem; letter-spacing:2px; margin-bottom:15px; font-weight:bold; text-transform:uppercase;";
+        document.getElementById('service-selector').after(statusMsg);
+        statusMsg.innerText = `> Unidad Seleccionada: ${service}`;
+        
+        document.getElementById('progress').style.width = "25%";
+    }
+
+    function resetSelector() {
+        currentService = "";
+        document.getElementById('hidden-service').value = "";
+        document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+        const statusMsg = document.getElementById('status-msg');
+        if (statusMsg) statusMsg.remove();
+        document.getElementById('progress').style.width = "0%";
+    }
+
+    function goToStep(step) {
+        // Validar que haya servicio seleccionado para avanzar
+        if(step > 1 && !currentService) {
+            const grid = document.getElementById('service-selector');
+            grid.style.animation = "shake 0.5s";
+            setTimeout(() => { grid.style.animation = ""; }, 500);
+            return;
+        }
+        
+        // Cambiar pestañas
+        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+        const nextStep = document.getElementById('step-' + step);
+        if(nextStep) nextStep.classList.add('active');
+        
+        // Barra de progreso
+        document.getElementById('progress').style.width = (step / 3) * 100 + "%";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const form = document.getElementById('pleroma-form');
+    
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        if(!form.checkValidity()) {
+            alert("Por favor rellena los campos requeridos.");
+            return;
+        }
+
+        // Pantalla de carga
+        document.getElementById('step-3').classList.remove('active');
+        document.getElementById('scanning-screen').style.display = 'block';
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                document.getElementById('scanning-screen').style.display = 'none';
+                document.getElementById('step-success').classList.add('active');
+                
+                const clientName = document.getElementById('client-name').value;
+                document.getElementById('final-msg').innerText = `Gracias ${clientName}, tu requerimiento de ${currentService} está siendo procesado por el núcleo.`;
+                
+                // Actualizar link de WhatsApp
+                const waMsg = encodeURIComponent(`Hola Junior, he completado el briefing para ${currentService} de la marca ${clientName}.`);
+                document.getElementById('whatsapp-link').href = `https://wa.me/584246159110?text=${waMsg}`;
+                
+                document.getElementById('progress').style.width = "100%";
+            } else {
+                throw new Error();
+            }
+        } catch (error) {
+            document.getElementById('scanning-screen').style.display = 'none';
+            document.getElementById('step-3').classList.add('active');
+            alert("Error en la conexión con el servidor. Inténtalo de nuevo.");
+        }
+    };
+</script>
+</body>
+</html>
